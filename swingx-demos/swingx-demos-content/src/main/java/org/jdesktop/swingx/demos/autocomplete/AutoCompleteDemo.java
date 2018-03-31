@@ -24,6 +24,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.beans.Beans;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -80,6 +81,7 @@ public class AutoCompleteDemo extends DefaultDemoPanel {
      * main method allows us to run as a standalone demo.
      */
     public static void main(String[] args) {
+        Beans.setDesignTime(true);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame(AutoCompleteDemo.class.getAnnotation(DemoProperties.class).value());

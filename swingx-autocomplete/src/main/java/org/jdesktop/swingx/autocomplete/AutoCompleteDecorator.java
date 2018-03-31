@@ -129,7 +129,7 @@ public class AutoCompleteDecorator {
     public static void decorate(JComboBox comboBox) {
         decorate(comboBox, null);
     }
-    
+
     /**
      * Enables automatic completion for the given JComboBox. The automatic
      * completion will be strict (only items from the combo box can be selected)
@@ -146,13 +146,38 @@ public class AutoCompleteDecorator {
      * decorator does not attempt to set any sizes on the supplied
      * {@code JComboBox}. Users that need to ensure sizes of supplied combos
      * should take measures to set the size of the combo.
-     * 
+     *
      * @param comboBox
      *                a combo box
      * @param stringConverter
      *                the converter used to transform items to strings
      */
     public static void decorate(JComboBox comboBox, ObjectToStringConverter stringConverter) {
+        decorate(comboBox, stringConverter, false);
+    }
+
+    /**
+     * Enables automatic completion for the given JComboBox. The automatic
+     * completion will be strict (only items from the combo box can be selected)
+     * if the combo box is not editable.
+     * <p>
+     * <b>Note:</b> the {@code AutoCompleteDecorator} will alter the state of
+     * the {@code JComboBox} to be editable. This can cause side effects with
+     * layouts and sizing. {@code JComboBox} caches the size, which differs
+     * depending on the component's editability. Therefore, if the component's
+     * size is accessed prior to being decorated and then the cached size is
+     * forced to be recalculated, the size of the component will change.
+     * <p>
+     * Because the size of the component can be altered (recalculated), the
+     * decorator does not attempt to set any sizes on the supplied
+     * {@code JComboBox}. Users that need to ensure sizes of supplied combos
+     * should take measures to set the size of the combo.
+     *  @param comboBox
+     *                a combo box
+     * @param stringConverter
+     * @param async
+     */
+    public static void decorate(JComboBox comboBox, ObjectToStringConverter stringConverter, boolean async) {
         undecorate(comboBox);
         
         boolean strictMatching = !comboBox.isEditable();
@@ -164,8 +189,16 @@ public class AutoCompleteDecorator {
         // configure the text component=editor component
         JTextComponent editorComponent = (JTextComponent) comboBox.getEditor().getEditorComponent();
         final AbstractAutoCompleteAdaptor adaptor = new ComboBoxAdaptor(comboBox);
-        final AutoCompleteDocument document = createAutoCompleteDocument(adaptor, strictMatching,
+        final AutoCompleteDocument document;
+
+        if (async) {
+            document =  new AsyncAutoCompleteDocument(adaptor, strictMatching,
                 stringConverter, editorComponent.getDocument());
+        } else {
+            document =  new AutoCompleteDocument(adaptor, strictMatching,
+                stringConverter, editorComponent.getDocument());
+        }
+
         decorate(editorComponent, document, adaptor);
         
         editorComponent.addKeyListener(new AutoComplete.KeyAdapter(comboBox));
